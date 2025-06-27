@@ -1,0 +1,85 @@
+// File: packages/api/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Represents a user's trading account connection.
+// This structure allows for future expansion to multiple users or brokers.
+model Portfolio {
+  id            Int      @id @default(autoincrement())
+  createdAt     DateTime @default(now())
+  brokerage     String   @default("Alpaca")
+  accountNumber String   @unique // The Alpaca account ID
+
+  // Relation: A portfolio can have many open positions.
+  positions Position[]
+}
+
+// Tracks a current, open position in a specific stock.
+// This table is "live" and will be updated with every trade.
+model Position {
+  id                Int      @id @default(autoincrement())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  symbol            String
+  quantity          Float
+  averageEntryPrice Float
+
+  // Relation: Each position belongs to one portfolio.
+  portfolioId Int
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id])
+
+  // Relation: A position is the result of one or more trades.
+  trades Trade[]
+
+  @@unique([portfolioId, symbol]) // Ensures only one position record per symbol in each portfolio.
+}
+
+// An immutable log of every individual executed trade (a fill).
+// This table should only be appended to, never modified.
+model Trade {
+  id        Int      @id @default(autoincrement())
+  timestamp DateTime @default(now())
+  orderId   String // The unique ID from the broker for the order this trade belongs to.
+  symbol    String
+  side      String // 'buy' or 'sell'
+  qty       Float // The quantity of shares for this specific fill.
+  price     Float // The execution price per share.
+
+  // Relation: Each trade contributes to a position.
+  positionId Int
+  position   Position @relation(fields: [positionId], references: [id])
+
+  // Relation: A trade might be the result of an agent decision.
+  agentDecision   AgentDecision? @relation(fields: [agentDecisionId], references: [id])
+  agentDecisionId Int?           @unique
+}
+
+// Logs the "why" behind an agent's actions. This is crucial for observability.
+model AgentDecision {
+  id        Int      @id @default(autoincrement())
+  timestamp DateTime @default(now())
+  input     String   @db.Text // The user prompt or market event trigger.
+  reasoning String   @db.Text // The agent's chain of thought or rationale.
+  action    String // The final action taken (e.g., "BUY_10_AAPL", "GET_ACCOUNT_INFO").
+
+  // Relation: An agent's decision might result in one trade.
+  executedTrade Trade?
+}
+
+// User accounts for authentication and ownership
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  firstName String?
+  lastName  String?
+  picture   String?
+  createdAt DateTime @default(now())
+  // portfolios Portfolio[] // Uncomment if you want to relate portfolios to users
+}

@@ -1,0 +1,12 @@
+{
+  "name": "helios-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "npm run --workspace=api start:dev",
+    "dev:web": "npm run --workspace=web dev",
+    "dev": "npm run dev:api & npm run dev:web"
+  }
+}
