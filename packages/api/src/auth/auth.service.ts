@@ -28,10 +28,7 @@ export class AuthService {
   async validateUser(details: UserDetails): Promise<User> {
     try {
       // Check if user exists
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      const existingUser = await this.prisma.user.findUnique({
-        where: { email: details.email },
-      });
+      const existingUser = await this.prisma.findUserByEmail(details.email);
 
       if (existingUser) {
         this.logger.log(`User found: ${details.email}`);
@@ -40,14 +37,11 @@ export class AuthService {
 
       // Create new user
       this.logger.log(`Creating new user: ${details.email}`);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      const newUser = await this.prisma.user.create({
-        data: {
-          email: details.email,
-          firstName: details.firstName,
-          lastName: details.lastName,
-          picture: details.picture,
-        },
+      const newUser = await this.prisma.createUser({
+        email: details.email,
+        firstName: details.firstName,
+        lastName: details.lastName,
+        picture: details.picture,
       });
       return newUser;
     } catch (error: unknown) {
