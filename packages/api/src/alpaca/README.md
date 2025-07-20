@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Alpaca module serves as the integration layer between the Helios Trading Bot and the Alpaca Markets API. It provides a clean, abstracted interface for accessing trading functionality, market data, and account information from Alpaca's commission-free trading platform.
+The Alpaca module serves as the integration layer between the Helios Trading Bot and the Alpaca Markets API. It provides a clean, abstracted interface for accessing trading functionality, market data, and account information from Alpaca's commission-free trading platform. This module has been enhanced to support both stock and cryptocurrency trading, with a focus on meme coin trading capabilities.
 
 ## Technology Stack
 
@@ -33,6 +33,8 @@ The `AlpacaService` is responsible for:
 2. **Account operations**: Fetching account information and balances
 3. **Portfolio management**: Getting positions, orders, and trade history
 4. **Market data**: Retrieving price quotes, bars, and other market information
+5. **Crypto trading**: Executing cryptocurrency trades, particularly focused on meme coins
+6. **Mock trading mode**: Simulating trades for testing without executing real transactions
 
 #### Methods
 
@@ -41,6 +43,53 @@ The `AlpacaService` is responsible for:
 | `getAccountInfo()` | Fetches account information from Alpaca. | None | `Promise<Account>` - The account information. |
 | `getPositions()` | Fetches all positions from Alpaca. | None | `Promise<Position[]>` - An array of positions. |
 | `getPosition(symbol: string)` | Fetches a specific position by its symbol from Alpaca. | `symbol: string` - The stock symbol of the position to fetch. | `Promise<Position | null>` - The position, or null if not found. |
+| `placeCryptoOrder(params: OrderParams)` | Places a cryptocurrency order via the Alpaca API. | `params: OrderParams` - The order parameters including symbol, quantity, side, type, etc. | `Promise<Order>` - The created order. |
+| `createMockOrder(params: OrderParams)` | Creates a mock order for testing without executing a real transaction. | `params: OrderParams` - The order parameters. | `Order` - A simulated order object. |
+| `logMockOrderDetails(order: Order)` | Logs mock order details for tracking purposes. | `order: Order` - The mock order to log. | `void` - No return value. |
+
+## Mock Trading Mode
+
+### Overview
+
+The AlpacaService includes a mock trading mode feature that allows developers to test trading functionality without executing real transactions. This is particularly useful during development, testing, and demonstration scenarios.
+
+### Configuration
+
+Mock mode is controlled via the `MOCK_TRADING` environment variable:
+
+```
+# In .env file
+MOCK_TRADING="true"  # Enable mock mode
+```
+
+When mock mode is enabled, the AlpacaService will log a warning message during initialization and will return simulated responses for trade execution methods.
+
+### How It Works
+
+1. During initialization, the AlpacaService checks the `MOCK_TRADING` environment variable.
+2. If enabled, all trade execution methods (like `placeCryptoOrder`) will return mock responses instead of making real API calls.
+3. Mock orders are generated with realistic data structures but do not affect real accounts or execute actual trades.
+4. All mock operations are logged for debugging and verification purposes.
+
+### When to Use
+
+- **Development**: When implementing new trading features or modifying existing ones
+- **Testing**: For unit tests, integration tests, and end-to-end tests
+- **Demonstrations**: When showcasing the application without risking real funds
+- **CI/CD Pipelines**: For automated testing in continuous integration environments
+
+### When Not to Use
+
+- **Production**: Never enable mock mode in production environments
+- **Real Trading**: When actual trade execution is required
+- **Performance Testing**: Mock mode may not accurately represent API latency
+
+### Tips for New Developers
+
+- Always check if mock mode is enabled before debugging trade execution issues
+- Mock orders are prefixed with "mock-" in their IDs for easy identification
+- The mock mode status is logged during application startup
+- Remember to disable mock mode when testing with real accounts
 
 ### Data Models
 

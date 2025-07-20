@@ -4,11 +4,15 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthenticationController } from './auth.controller';
 import { GoogleStrategy } from './google.strategy';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
-  imports: [PassportModule.register({ session: true }), ConfigModule],
-  providers: [AuthService, GoogleStrategy, PrismaService],
+  imports: [
+    PassportModule.register({ session: true }),
+    ConfigModule,
+    PrismaModule,
+  ],
+  providers: [AuthService, GoogleStrategy],
   controllers: [AuthenticationController],
   exports: [AuthService],
 })

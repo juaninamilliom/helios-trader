@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
   Injectable,
   Logger,
@@ -26,11 +23,21 @@ import { ensureError } from '../utils/error-handling';
 export class PrismaService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(PrismaService.name);
 
+  private readonly prisma: PrismaClient;
+
   /**
    * Creates an instance of PrismaService.
-   * @param prisma - The injected PrismaClient.
    */
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor() {
+    this.prisma = new PrismaClient({
+      log: [
+        { emit: 'event', level: 'query' },
+        { emit: 'stdout', level: 'info' },
+        { emit: 'stdout', level: 'warn' },
+        { emit: 'stdout', level: 'error' },
+      ],
+    });
+  }
 
   /**
    * Lifecycle hook that runs when the module is initialized.
