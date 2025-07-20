@@ -6,9 +6,20 @@ import { AlpacaModule } from './alpaca/alpaca.module';
 import { AgentModule } from './agent/agent.module';
 import { AuthModule } from './auth/auth.module';
 import { AuthenticationController } from './auth/auth.controller';
+import { MarketDataModule } from './market-data/market-data.module';
+import { SentimentModule } from './sentiment/sentiment.module';
+import { RiskModule } from './risk/risk.module';
 
 @Module({
-  imports: [PrismaModule, AlpacaModule, AgentModule, AuthModule],
+  imports: [
+    PrismaModule,
+    AlpacaModule,
+    AgentModule,
+    AuthModule,
+    MarketDataModule,
+    SentimentModule,
+    RiskModule,
+  ],
   controllers: [AppController, AuthenticationController],
   providers: [AppService],
 })

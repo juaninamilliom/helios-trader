@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { AgentService } from './agent.service';
@@ -101,23 +102,27 @@ describe('AgentService', () => {
 
   describe('onModuleInit', () => {
     it('should call setupAgent on initialization', async () => {
-      const setupAgentSpy = jest.spyOn(service as any, 'setupAgent').mockResolvedValue(undefined);
-      
+      const setupAgentSpy = jest
+        .spyOn(service as any, 'setupAgent')
+        .mockResolvedValue(undefined);
+
       await service.onModuleInit();
-      
+
       expect(setupAgentSpy).toHaveBeenCalled();
     });
 
     it('should log error if setupAgent fails', async () => {
       const errorMessage = 'Setup failed';
-      jest.spyOn(service as any, 'setupAgent').mockRejectedValue(new Error(errorMessage));
+      jest
+        .spyOn(service as any, 'setupAgent')
+        .mockRejectedValue(new Error(errorMessage));
       const loggerErrorSpy = jest.spyOn(service['logger'], 'error');
-      
+
       await service.onModuleInit();
-      
+
       expect(loggerErrorSpy).toHaveBeenCalledWith(
         `FATAL: Failed to setup agent on module init: ${errorMessage}`,
-        expect.any(String)
+        expect.any(String),
       );
     });
   });
@@ -125,15 +130,19 @@ describe('AgentService', () => {
   describe('setupAgent', () => {
     it('should throw error if OpenAI API key is missing', async () => {
       jest.spyOn(configService, 'get').mockReturnValue(undefined);
-      
-      await expect(service['setupAgent']()).rejects.toThrow('Failed to setup agent: OpenAI API key is missing');
+
+      await expect(service['setupAgent']()).rejects.toThrow(
+        'Failed to setup agent: OpenAI API key is missing',
+      );
     });
 
     it('should initialize model and call initializeAgent', async () => {
-      const initializeAgentSpy = jest.spyOn(service as any, 'initializeAgent').mockResolvedValue(undefined);
-      
+      const initializeAgentSpy = jest
+        .spyOn(service as any, 'initializeAgent')
+        .mockResolvedValue(undefined);
+
       await service['setupAgent']();
-      
+
       expect(ChatOpenAI).toHaveBeenCalledWith({
         openAIApiKey: 'test-openai-key',
         modelName: 'gpt-4',
@@ -144,59 +153,83 @@ describe('AgentService', () => {
 
     it('should handle errors from alpacaService in getAccountInfoTool', async () => {
       const errorMessage = 'API error';
-      jest.spyOn(alpacaService, 'getAccountInfo').mockRejectedValue(new Error(errorMessage));
-      jest.spyOn(service as any, 'initializeAgent').mockResolvedValue(undefined);
-      
+      jest
+        .spyOn(alpacaService, 'getAccountInfo')
+        .mockRejectedValue(new Error(errorMessage));
+      jest
+        .spyOn(service as any, 'initializeAgent')
+        .mockResolvedValue(undefined);
+
       await service['setupAgent']();
-      
+
       expect(service['model']).toBeDefined();
     });
-    
+
     it('should create a dynamic tool that processes account info correctly', async () => {
       // Mock the DynamicTool constructor to capture the function passed to it
       let capturedToolFunction: Function;
       jest.mock('@langchain/core/tools', () => ({
         DynamicTool: jest.fn().mockImplementation((config) => {
           capturedToolFunction = config.func;
-          return { name: config.name, description: config.description, func: config.func };
+          return {
+            name: config.name,
+            description: config.description,
+            func: config.func,
+          };
         }),
       }));
-      
+
       // Setup the test
-      jest.spyOn(service as any, 'initializeAgent').mockResolvedValue(undefined);
-      
+      jest
+        .spyOn(service as any, 'initializeAgent')
+        .mockResolvedValue(undefined);
+
       // Execute setupAgent
       await service['setupAgent']();
-      
+
       // Directly test the dynamic tool's function by accessing the service's private property
       // This is a bit of a hack, but necessary to test the function inside the DynamicTool
       const tools = (service as any).tools || [];
-      const getAccountInfoTool = tools.find((t: any) => t.name === 'getAccountInfo');
-      
+      const getAccountInfoTool = tools.find(
+        (t: any) => t.name === 'getAccountInfo',
+      );
+
       // If we can't access the tool directly, we'll use reflection to find and test it
       if (!getAccountInfoTool) {
         // The test passes anyway since we're testing the overall setupAgent function
         return;
       }
-      
+
       // Test the tool function with valid account data
       const result = await getAccountInfoTool.func();
       const parsedResult = JSON.parse(result);
-      
-      expect(parsedResult).toHaveProperty('buying_power', mockAccount.buying_power);
-      expect(parsedResult).toHaveProperty('portfolio_value', mockAccount.portfolio_value);
+
+      expect(parsedResult).toHaveProperty(
+        'buying_power',
+        mockAccount.buying_power,
+      );
+      expect(parsedResult).toHaveProperty(
+        'portfolio_value',
+        mockAccount.portfolio_value,
+      );
       expect(parsedResult).toHaveProperty('equity', mockAccount.equity);
       expect(parsedResult).toHaveProperty('profit_loss', '10000');
     });
-    
+
     it('should handle NaN values in profit/loss calculation', async () => {
       // Create a mock account with NaN-producing values
-      const nanAccount = { ...mockAccount, equity: 'invalid', last_equity: 'invalid' };
+      const nanAccount = {
+        ...mockAccount,
+        equity: 'invalid',
+        last_equity: 'invalid',
+      };
       jest.spyOn(alpacaService, 'getAccountInfo').mockResolvedValue(nanAccount);
-      jest.spyOn(service as any, 'initializeAgent').mockResolvedValue(undefined);
-      
+      jest
+        .spyOn(service as any, 'initializeAgent')
+        .mockResolvedValue(undefined);
+
       await service['setupAgent']();
-      
+
       // The test passes if setupAgent completes without throwing
       expect(service['model']).toBeDefined();
     });
@@ -205,16 +238,18 @@ describe('AgentService', () => {
   describe('initializeAgent', () => {
     it('should throw error if model is not initialized', async () => {
       service['model'] = null;
-      
-      await expect(service['initializeAgent'](null as any)).rejects.toThrow('Failed to initialize agent: Model not initialized');
+
+      await expect(service['initializeAgent'](null as any)).rejects.toThrow(
+        'Failed to initialize agent: Model not initialized',
+      );
     });
 
     it('should initialize agent executor with tools', async () => {
       service['model'] = new ChatOpenAI();
       const mockTool = { name: 'testTool' };
-      
+
       await service['initializeAgent'](mockTool as any);
-      
+
       expect(service['agentExecutor']).toBeDefined();
     });
   });
@@ -222,9 +257,9 @@ describe('AgentService', () => {
   describe('query', () => {
     it('should return error message if agent is not initialized', async () => {
       service['agentExecutor'] = null;
-      
+
       const result = await service.query('test query');
-      
+
       expect(result).toBe('The AI agent is not ready. Please try again later.');
     });
 
@@ -233,9 +268,9 @@ describe('AgentService', () => {
       service['agentExecutor'] = {
         invoke: jest.fn().mockResolvedValue({ output: expectedResponse }),
       } as unknown as AgentExecutor;
-      
+
       const result = await service.query('What is my account balance?');
-      
+
       expect(result).toBe(expectedResponse);
     });
 
@@ -243,10 +278,12 @@ describe('AgentService', () => {
       service['agentExecutor'] = {
         invoke: jest.fn().mockResolvedValue({ invalid: 'format' }),
       } as unknown as AgentExecutor;
-      
+
       const result = await service.query('test query');
-      
-      expect(result).toBe('The agent returned a response in an unexpected format.');
+
+      expect(result).toBe(
+        'The agent returned a response in an unexpected format.',
+      );
     });
 
     it('should handle errors during query processing', async () => {
@@ -254,10 +291,12 @@ describe('AgentService', () => {
       service['agentExecutor'] = {
         invoke: jest.fn().mockRejectedValue(new Error(errorMessage)),
       } as unknown as AgentExecutor;
-      
+
       const result = await service.query('test query');
-      
-      expect(result).toBe(`An error occurred while processing your query: ${errorMessage}`);
+
+      expect(result).toBe(
+        `An error occurred while processing your query: ${errorMessage}`,
+      );
     });
   });
 });

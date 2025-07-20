@@ -28,7 +28,9 @@ describe('AlpacaController', () => {
     it('should return a welcome message with the user email', () => {
       const req = { user: { email: 'test@example.com' } };
       const result = controller.getProtected(req);
-      expect(result.message).toBe('Hello, test@example.com! You are authenticated.');
+      expect(result.message).toBe(
+        'Hello, test@example.com! You are authenticated.',
+      );
     });
 
     it('should return a generic welcome message if user email is not present', () => {

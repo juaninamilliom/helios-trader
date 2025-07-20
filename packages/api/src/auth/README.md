@@ -1,8 +1,8 @@
 # Auth Module
 
-## Purpose
+## Overview
 
-The `auth` module is responsible for handling all authentication and authorization for the application. It uses Google OAuth 2.0 for user authentication, providing a secure and seamless login experience.
+The Auth module is responsible for handling all authentication and authorization for the Helios Trading Bot. It implements a secure OAuth 2.0 authentication flow with Google, managing user sessions, and protecting API routes to ensure that only authenticated users can access sensitive trading functionality and personal account information.
 
 ## Technology Choices
 
@@ -37,3 +37,35 @@ The `auth` module is critical for securing the application. It ensures that only
 
 - **`AuthenticatedGuard` class:**
   - `canActivate`: This is a route guard that checks if a user is authenticated before allowing access to a protected route.
+
+## When to Use
+
+- **Protected Routes**: Apply the AuthenticatedGuard to any routes that should only be accessible to logged-in users
+- **User-Specific Data**: When retrieving or modifying data that belongs to a specific user
+- **Trading Operations**: For all endpoints that execute trades or access financial information
+- **User Profile Management**: When handling user profile data or preferences
+- **Session Management**: For maintaining and validating user sessions
+
+## When Not to Use
+
+- **Public Information**: For routes that provide general, non-sensitive information
+- **Marketing Pages**: Landing pages and marketing content should remain accessible without authentication
+- **Documentation**: API documentation and help resources should typically be publicly accessible
+- **Health Checks**: System health and status endpoints should not require authentication
+
+## Tips for New Developers
+
+- **Environment Variables**: Ensure Google OAuth credentials are properly set in the `.env` file
+- **Session Configuration**: Review session settings in the application for appropriate timeout values
+- **Testing Authentication**: Use mock authentication for testing protected routes
+- **Error Handling**: Implement proper error handling for authentication failures
+- **Redirect URLs**: Verify that callback URLs are correctly configured in both the application and Google Developer Console
+- **CORS Settings**: Ensure CORS is properly configured to allow authentication from the frontend
+- **Security Best Practices**: Follow OAuth 2.0 security best practices, including using HTTPS
+- **User Permissions**: Consider implementing role-based access control for different user types
+
+## Recent Changes
+
+- Fixed dependency injection issues with PrismaService
+- Updated to use the global PrismaModule instead of providing PrismaService directly
+- Ensured compatibility with the latest NestJS version
