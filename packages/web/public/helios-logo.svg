@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="60" cy="60" r="55" fill="#1E40AF" />
+  
+  <!-- Inner Circle -->
+  <circle cx="60" cy="60" r="45" fill="#2563EB" />
+  
+  <!-- Stylized H for Helios -->
+  <path d="M40 30V90M40 60H80M80 30V90" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" />
+  
+  <!-- Trading Chart Line -->
+  <path d="M30 75L45 60L55 70L70 45L85 55" stroke="#FCD34D" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  
+  <!-- Sun Rays -->
+  <circle cx="60" cy="60" r="15" fill="#FCD34D" />
+  <path d="M60 25V15M60 105V95M25 60H15M105 60H95M35 35L28 28M85 85L92 92M85 35L92 28M35 85L28 92" stroke="#FCD34D" stroke-width="3" stroke-linecap="round" />
+</svg>
