@@ -1,3 +1,31 @@
+# Helios connected finance
+
+The default app is a read-only finance dashboard with Google sign-in, Postgres persistence, real Plaid **Sandbox** Link, transaction synchronization and categorized activity. `/demo` is a separate, labeled fictional UI prototype. The finance API does not expose the legacy trading agent.
+
+## Local start
+
+Requires Node.js 22+, npm and Docker Compose. From this repository:
+
+```sh
+npm ci
+cp packages/api/.env.example packages/api/.env
+node scripts/setup-finance-env.mjs
+docker compose --env-file packages/api/.env.finance.local -f compose.finance.yml up -d db
+npm run --workspace=api db:generate:finance
+npm run --workspace=api db:migrate:finance
+npm run dev
+```
+
+Fill Google OAuth and Plaid Sandbox values in the ignored `packages/api/.env`. Register `http://localhost:3001/api/authentication/google/callback` with Google. Open http://localhost:3001. Keep `.env.finance.local` and its generated encryption key private and stable. The database listens on localhost:55433; the API on localhost:3003.
+
+Luna is the default classifier (`FINANCE_CLASSIFIER=luna`, `OPENAI_API_KEY`). Direct Jev uses `FINANCE_CLASSIFIER=jev`, `FINANCE_JEV_PROVIDER=typesafe`, `TYPESAFE_API_KEY` and `FINANCE_JEV_MODEL=jev-latest`. OpenRouter is an optional explicit transport, with a separate key and restricted provider routing. Provider or model changes invalidate prior AI consent. Enable the matching consent in Intelligence before classifying uncertain purchases. There is no automatic cross-provider fallback.
+
+See [setup, provider configuration and verification](docs/architecture/finance-local-setup.md), [API contract](docs/api/finance.openapi.yaml), and [development server management](docs/architecture/dev-server-management.md). Development checks use `tsc --noEmit`; no build is required.
+
+Sandbox supplies fictional accounts and transactions. Production/Trial Plaid, money movement, trading and a production deployment are outside this milestone. Model classifications never change accounting semantics. The legacy trading code below is retained for reference and is not started by `npm run dev`.
+
+---
+
 # Helios Trading Bot
 
 Helios is an AI-powered trading assistant that helps you make informed trading decisions using natural language. The application integrates with Alpaca API for real-time market data and trade execution, and uses LangChain with OpenAI's GPT models to provide intelligent trading insights.

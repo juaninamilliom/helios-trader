@@ -1,0 +1,23 @@
+simulation: Helios finance integration
+routing: path
+mocks:
+  - name: Plaid
+    routeKey: plaid
+    origin:
+      - sandbox.plaid.com
+    path: postman/mocks/plaid
+  - name: OpenAI
+    routeKey: openai
+    origin:
+      - api.openai.com
+    path: postman/mocks/openai
+  - name: OpenRouter
+    routeKey: openrouter
+    origin:
+      - openrouter.ai
+    path: postman/mocks/openrouter
+  - name: TypeSafe
+    routeKey: typesafe
+    origin:
+      - api.typesafe.ai
+    path: postman/mocks/typesafe

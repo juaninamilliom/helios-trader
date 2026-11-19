@@ -31,12 +31,12 @@ export class AuthService {
       const existingUser = await this.prisma.findUserByEmail(details.email);
 
       if (existingUser) {
-        this.logger.log(`User found: ${details.email}`);
+        this.logger.log('Existing user authenticated');
         return existingUser;
       }
 
       // Create new user
-      this.logger.log(`Creating new user: ${details.email}`);
+      this.logger.log('Creating a user account');
       const newUser = await this.prisma.createUser({
         email: details.email,
         firstName: details.firstName,

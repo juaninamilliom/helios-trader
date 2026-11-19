@@ -15,6 +15,10 @@ async function bootstrap() {
       saveUninitialized: false,
       cookie: {
         maxAge: 3600000, // 1 hour
+        httpOnly: true,
+        sameSite: 'lax', // Standard for modern browsers, allows cookies on top-level navigation
+        secure: false, // Must be false for HTTP
+        path: '/',
       },
     }),
   );
@@ -23,14 +27,17 @@ async function bootstrap() {
   app.use(passport.session());
 
   // Enable CORS for frontend communication
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+  const frontendUrls = [
+    process.env.FRONTEND_URL || 'http://localhost:3001',
+    'http://localhost:3000', // Allow requests from default Next.js port during transition
+  ];
   app.enableCors({
-    origin: frontendUrl, // Your frontend URL
+    origin: frontendUrls, // Your frontend URLs
     credentials: true,
   });
-  console.log(`CORS enabled for origin: ${frontendUrl}`);
+  console.log(`CORS enabled for origins: ${frontendUrls.join(', ')}`);
 
-  const port = process.env.PORT || 3000;
+  const port = process.env.PORT || 3003;
   await app.listen(port);
   console.log(`Application is running on: http://localhost:${port}`);
 }

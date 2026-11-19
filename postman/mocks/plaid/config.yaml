@@ -1,0 +1,9 @@
+version: 1
+slug: helios-plaid
+protocol: http
+name: Helios Plaid contract stand-in
+port: 4011
+interceptRequests: true
+scenarios:
+  - name: default
+    path: default.js

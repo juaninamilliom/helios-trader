@@ -5,6 +5,7 @@ import { AuthService } from './auth.service';
 import { AuthenticationController } from './auth.controller';
 import { GoogleStrategy } from './google.strategy';
 import { PrismaModule } from '../prisma/prisma.module';
+import { SessionSerializer } from './session.serializer';
 
 @Module({
   imports: [
@@ -12,7 +13,7 @@ import { PrismaModule } from '../prisma/prisma.module';
     ConfigModule,
     PrismaModule,
   ],
-  providers: [AuthService, GoogleStrategy],
+  providers: [AuthService, GoogleStrategy, SessionSerializer],
   controllers: [AuthenticationController],
   exports: [AuthService],
 })

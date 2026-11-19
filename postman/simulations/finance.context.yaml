@@ -1,0 +1,25 @@
+purpose:
+  stands_in_for: Plaid Sandbox read APIs, OpenAI Responses, TypeSafe System One and OpenRouter Decisions/chat classification APIs.
+  unblocks: Helios finance service HTTP, persistence and failure-handling verification without provider credentials or personal financial data.
+assumptions:
+  - id: plaid-cursor-contract
+    status: supported
+    claim: Plaid documents cursor-based added/modified/removed transaction updates; Helios preserves its database cursor when a modeled pagination page fails.
+    reason: Official contract read plus real caller/Postgres checks against the local contract stand-in.
+    verification: November 17, 2026; finance.integration.ts passed, including partial-page rollback, repeated updates, pending replacement, removals and pagination-mutation restart. Simulation request events showed accounts/get and transactions/sync including 503 and mutation-error responses. No actual Plaid request was made.
+    source: https://plaid.com/docs/api/products/transactions/ ; packages/api/test/finance.integration.ts ; postman/mocks/plaid/default.js
+    updated_at: '2026-11-17'
+  - id: structured-classification-fallback
+    status: supported
+    claim: In the tested local cases Helios does not accept model income/transfer categories, refusals or failed Responses requests as successful classification.
+    reason: Real provider client code ran against explicit schema-invalid, refusal and rate-limit responses; opt-in and corrections were tested through HTTP and Postgres.
+    verification: November 17, 2026; finance.integration.ts passed; simulation request events included POST /responses with both 200 and 429. These checks establish local caller behavior, not model accuracy or real-service availability.
+    source: packages/api/src/finance/providers.ts ; packages/api/test/finance.integration.ts ; https://developers.openai.com/api/docs/guides/structured-outputs
+    updated_at: '2026-11-17'
+  - id: provider-routing
+    status: supported
+    claim: Each explicit model route uses its provider-specific request format and rejects tested invalid answers.
+    reason: Local HTTP adapter checks cover Luna Responses, direct Jev System One, OpenRouter Jev Decisions and Luna chat.
+    verification: November 18, 2026; inference-routing.integration.ts passed. Live TypeSafe synthetic smoke succeeded separately; live OpenRouter and Luna success are not established.
+    source: packages/api/test/inference-routing.integration.ts ; docs/architecture/finance-local-setup.md
+    updated_at: '2026-11-18'
