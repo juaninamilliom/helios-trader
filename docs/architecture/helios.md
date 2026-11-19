@@ -1,4 +1,4 @@
-> Historical planning/review snapshot. See finance-local-setup.md for current implementation and verification.
+> Historical planning/review snapshot. See [the current architecture](../../ARCHITECTURE.md) for design and decisions, and finance-local-setup.md for setup and verification.
 
 # Helios architecture and implementation plan
 

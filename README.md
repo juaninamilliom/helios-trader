@@ -2,6 +2,10 @@
 
 The default app is a read-only finance dashboard with Google sign-in, Postgres persistence, real Plaid **Sandbox** Link, transaction synchronization and categorized activity. `/demo` is a separate, labeled fictional UI prototype. The finance API does not expose the legacy trading agent.
 
+## Design and coding-agent guidance
+
+Read [ARCHITECTURE.md](ARCHITECTURE.md) for the system design and decisions. [AGENTS.md](AGENTS.md) connects planning/review to the [living product-vertical architect references](.agents/architects/README.md).
+
 ## Local start
 
 Requires Node.js 22+, npm and Docker Compose. From this repository:

@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1100" viewBox="0 0 1800 1100" role="img" aria-labelledby="title desc">
+<title id="title">Helios connected-finance architecture</title>
+<desc id="desc">The Next.js browser connects to the NestJS finance API through a same-origin proxy and opens provider-hosted Plaid Link. The API uses Google identity, stores sessions, owned records and encrypted tokens in Postgres, exchanges and syncs with Plaid Sandbox, and sends only consented minimized merchant text to one explicitly selected inference route. No automatic cross-provider fallback or money movement.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#526477"/></marker>
+<style>
+text{font-family:Arial,Helvetica,sans-serif;fill:#142b3e} .heading{font-size:39px;font-weight:700}.sub{font-size:22px;fill:#536779}.label{font-size:21px;fill:#42596b}.title{font-size:27px;font-weight:700}.body{font-size:21px;fill:#42596b}.tag{font-size:17px;font-weight:700;letter-spacing:2px}.node{fill:#fff;stroke:#b9c9d4;stroke-width:2}.edge{fill:none;stroke:#526477;stroke-width:3;marker-end:url(#arrow)}
+</style>
+</defs>
+<rect width="1800" height="1100" fill="#f5f8fa"/>
+<text class="heading" x="65" y="63">Helios · Connected finance</text>
+<text class="sub" x="65" y="100">Current system design · Read-only · Plaid Sandbox</text>
+<!-- Identity -->
+<rect class="node" x="720" y="140" width="320" height="105" rx="20"/>
+<text class="title" x="880" y="184" text-anchor="middle">Google</text>
+<text class="body" x="880" y="219" text-anchor="middle">Verified identity + OAuth</text>
+<!-- Main application and persistence -->
+<rect class="node" x="65" y="350" width="350" height="190" rx="22"/>
+<rect x="65" y="350" width="350" height="10" rx="5" fill="#477d76"/>
+<text class="tag" x="95" y="393" fill="#477d76">BROWSER</text>
+<text class="title" x="95" y="438">Next.js connected UI</text>
+<text class="body" x="95" y="479">Accounts · Activity · Insights</text>
+<text class="body" x="95" y="512">Consent and recovery states</text>
+<rect class="node" x="650" y="330" width="460" height="230" rx="22"/>
+<rect x="650" y="330" width="460" height="10" rx="5" fill="#476f9a"/>
+<text class="tag" x="685" y="377">SERVER · FINANCE ENTRY</text>
+<text class="title" x="685" y="423">NestJS finance API</text>
+<text class="body" x="685" y="464">Sessions + ownership checks</text>
+<text class="body" x="685" y="499">Account sync + transaction processing</text>
+<text class="body" x="685" y="534">Validated category suggestions</text>
+<rect class="node" x="1380" y="350" width="355" height="190" rx="22"/>
+<rect x="1380" y="350" width="355" height="10" rx="5" fill="#8c7344"/>
+<text class="tag" x="1410" y="393">PERSISTENCE</text>
+<text class="title" x="1410" y="438">Postgres · Prisma</text>
+<text class="body" x="1410" y="479">Users, sessions, owned data</text>
+<text class="body" x="1410" y="512">Encrypted provider tokens</text>
+<path class="edge" d="M415 445H650"/>
+<text class="label" x="531" y="405" text-anchor="middle">Same-origin</text><text class="label" x="531" y="431" text-anchor="middle">API proxy</text>
+<path class="edge" d="M1110 445H1380"/>
+<text class="label" x="1245" y="405" text-anchor="middle">Persist / query</text><text class="label" x="1245" y="431" text-anchor="middle">user-owned records</text>
+<path class="edge" d="M880 330V245"/>
+<text class="label" x="910" y="294">Sign-in</text>
+<!-- Account provider -->
+<rect class="node" x="65" y="740" width="350" height="155" rx="22"/>
+<text class="title" x="95" y="789">Plaid Sandbox</text>
+<text class="body" x="95" y="829">Provider-hosted Link</text>
+<text class="body" x="95" y="864">Fictional account data</text>
+<path class="edge" d="M220 540V740"/>
+<text class="label" x="245" y="637">Open Link</text>
+<path class="edge" d="M730 560V635H445V785H415"/>
+<text class="label" x="465" y="620">Token exchange</text><text class="label" x="465" y="659">+ cursor sync</text>
+<!-- Inference boundary -->
+<rect x="600" y="740" width="1135" height="240" rx="24" fill="#edf3ee" stroke="#a6c1aa" stroke-width="2"/>
+<text class="tag" x="630" y="782">ONE EXPLICITLY SELECTED INFERENCE ROUTE</text>
+<text class="body" x="630" y="816">Category suggestions only · No automatic cross-provider fallback</text>
+<path class="edge" d="M1010 560V740"/>
+<text class="label" x="1040" y="633">Matching consent required</text>
+<text class="label" x="1040" y="666">Minimized merchant text only</text>
+<rect class="node" x="630" y="847" width="330" height="103" rx="16"/>
+<text class="title" x="795" y="888" text-anchor="middle">OpenAI · Luna</text>
+<text class="body" x="795" y="922" text-anchor="middle">Default route</text>
+<rect class="node" x="985" y="847" width="330" height="103" rx="16"/>
+<text class="title" x="1150" y="888" text-anchor="middle">TypeSafe · Jev</text>
+<text class="body" x="1150" y="922" text-anchor="middle">Direct alternative</text>
+<rect class="node" x="1340" y="847" width="365" height="103" rx="16"/>
+<text class="title" x="1522" y="888" text-anchor="middle">OpenRouter</text>
+<text class="body" x="1522" y="922" text-anchor="middle">Optional Jev / Luna transport</text>
+<text class="sub" x="65" y="1030">Architecture shows available routes, not proof of live provider access or model accuracy.</text>
+<text class="sub" x="65" y="1067">Separate fictional demo · No trading or money movement in the finance entry</text>
+</svg>
