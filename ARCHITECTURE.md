@@ -10,18 +10,9 @@ Evidence: `packages/web/src/app/page.tsx:3` says `redirect("/connected");`; `pac
 
 ## Runtime and trust boundaries
 
-```mermaid
-flowchart LR
-  Browser[Next.js connected UI] -->|same-origin API proxy| API[NestJS finance entry]
-  Browser -->|provider-hosted Link| Plaid[Plaid Sandbox]
-  API -->|OAuth identity| Google[Google]
-  API -->|sessions, owned data, encrypted tokens| DB[(Postgres)]
-  API -->|exchange and cursor sync| Plaid
-  API -->|consented minimized merchant text| Model[Selected inference route]
-  Model --> OpenAI[OpenAI Luna]
-  Model --> TypeSafe[Direct TypeSafe Jev]
-  Model --> Router[Optional OpenRouter]
-```
+![Helios connected-finance architecture: browser, finance API, Google identity, Postgres, Plaid Sandbox and explicitly selected inference routes](docs/diagrams/finance-architecture.png)
+
+Diagram source: [editable SVG](docs/diagrams/finance-architecture.svg). Update the SVG and regenerate the PNG in the same PR when these boundaries change. The diagram shows available architectural routes, not verified live provider access.
 
 The model branches are alternatives selected explicitly on the server, not automatic fallback. Browser provider tokens are exchanged on the server; persistent Plaid access tokens are encrypted before storage. Server credentials and runtime control data do not belong in browser bundles, repository fixtures or logs. Merchant minimization reduces data exposure but does not make merchant text anonymous.
 
