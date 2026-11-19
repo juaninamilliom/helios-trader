@@ -1,0 +1,9 @@
+version: 1
+slug: helios-openrouter
+protocol: http
+name: Helios OpenRouter contract stand-in
+port: 4013
+interceptRequests: true
+scenarios:
+  - name: default
+    path: default.js

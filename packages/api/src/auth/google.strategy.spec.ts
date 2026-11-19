@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/unbound-method -- Jest inspects mock calls; these references are never invoked without their receiver. */
 import { Test, TestingModule } from '@nestjs/testing';
 import { GoogleStrategy } from './google.strategy';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
+import { Profile } from 'passport-google-oauth20';
 import { User } from '@prisma/client';
 
 describe('GoogleStrategy', () => {
@@ -51,16 +53,35 @@ describe('GoogleStrategy', () => {
 
   describe('validate', () => {
     it('should validate and return the user', async () => {
-      const profile = {
+      const profile: Profile = {
+        id: 'google-user',
+        provider: 'google',
+        displayName: 'Test User',
+        profileUrl: '',
+        _raw: '{}',
+        _json: {
+          sub: 'google-user',
+          email_verified: true,
+          iss: 'https://accounts.google.com',
+          aud: 'test_client_id',
+          iat: 1,
+          exp: 2,
+        },
         name: { givenName: 'Test', familyName: 'User' },
-        emails: [{ value: 'test@example.com' }],
+        emails: [{ value: 'test@example.com', verified: true }],
         photos: [{ value: 'test.jpg' }],
       };
       const done = jest.fn();
 
       jest.spyOn(authService, 'validateUser').mockResolvedValue(mockUser);
 
-      await strategy.validate(null, 'accessToken', 'refreshToken', profile, done);
+      await strategy.validate(
+        null,
+        'accessToken',
+        'refreshToken',
+        profile,
+        done,
+      );
 
       expect(authService.validateUser).toHaveBeenCalledWith({
         email: 'test@example.com',

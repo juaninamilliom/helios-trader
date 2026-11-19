@@ -1,0 +1,18 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: helios
+      POSTGRES_PASSWORD: ${FINANCE_DB_PASSWORD:?Run node scripts/setup-finance-env.mjs first}
+      POSTGRES_DB: helios_finance
+    ports:
+      - "127.0.0.1:55433:5432"
+    volumes:
+      - finance_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U helios -d helios_finance"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+volumes:
+  finance_data:

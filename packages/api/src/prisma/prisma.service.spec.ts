@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method -- Jest inspects mock calls; these references are never invoked without their receiver. */
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from './prisma.service';
 import {
@@ -10,21 +11,38 @@ import {
 import { DeepMockProxy, mockDeep } from 'jest-mock-extended';
 
 // Mock data
-const mockPortfolioData: Partial<Portfolio> = {
+const mockPortfolioData: Portfolio = {
   id: 1,
   accountNumber: 'ACC123456',
   brokerage: 'Alpaca',
+  createdAt: new Date(),
 };
-const mockPositionData: Partial<Position> = {
+const mockPositionData: Position = {
   id: 1,
   symbol: 'AAPL',
   quantity: 10,
   averageEntryPrice: 150.0,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  portfolioId: 1,
 };
-const mockTradeData: Partial<Trade> = { id: 1, symbol: 'AAPL', side: 'buy' };
-const mockAgentDecisionData: Partial<AgentDecision> = {
+const mockTradeData: Trade = {
+  id: 1,
+  symbol: 'AAPL',
+  side: 'buy',
+  timestamp: new Date(),
+  orderId: 'order-1',
+  qty: 1,
+  price: 150,
+  positionId: 1,
+  agentDecisionId: null,
+};
+const mockAgentDecisionData: AgentDecision = {
   id: 1,
   action: 'BUY',
+  timestamp: new Date(),
+  input: 'test',
+  reasoning: 'fixture',
 };
 
 describe('PrismaService', () => {
@@ -41,6 +59,7 @@ describe('PrismaService', () => {
 
     service = module.get<PrismaService>(PrismaService);
     mockPrisma = module.get(PrismaClient);
+    Object.defineProperty(service, 'prisma', { value: mockPrisma });
   });
 
   afterEach(() => {

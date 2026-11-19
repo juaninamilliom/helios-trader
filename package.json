@@ -4,11 +4,16 @@
   "workspaces": [
     "packages/*"
   ],
- "scripts": {
-  "dev:api": "npm run --workspace=api start:dev",
-  "dev:web": "npm run --workspace=web dev",
-  "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\""
-},
+  "scripts": {
+    "dev:api": "node scripts/finance-dev.mjs run",
+    "dev:web": "npm run --workspace=web dev",
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api:start": "node scripts/finance-dev.mjs start",
+    "dev:api:stop": "node scripts/finance-dev.mjs stop",
+    "dev:api:status": "node scripts/finance-dev.mjs status",
+    "dev:api:logs": "node scripts/finance-dev.mjs logs",
+    "dev:api:restart": "node scripts/finance-dev.mjs restart"
+  },
   "devDependencies": {
     "concurrently": "^9.2.0"
   }

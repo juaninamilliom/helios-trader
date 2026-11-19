@@ -1,6 +1,6 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { Profile, Strategy, VerifyCallback } from 'passport-google-oauth20';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 
@@ -25,6 +25,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       callbackURL,
       scope: ['email', 'profile'],
       passReqToCallback: true,
+      state: true,
     });
 
     this.logger.log(`Using Google Callback URL: ${callbackURL}`);
@@ -48,6 +49,10 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     done: VerifyCallback,
   ): Promise<any> {
     const { name, emails, photos } = profile;
+    if (!emails?.[0]?.value || profile._json?.email_verified !== true) {
+      done(new UnauthorizedException('A verified Google email is required'));
+      return;
+    }
     const user = await this.authService.validateUser({
       email: emails?.[0].value || '',
       firstName: name?.givenName || '',

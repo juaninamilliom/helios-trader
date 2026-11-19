@@ -1,77 +1,70 @@
-import { Controller, Get, UseGuards, Req, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  UseGuards,
+  Req,
+  Res,
+  ForbiddenException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Response, Request } from 'express';
-import { Session } from 'express-session';
 
 @Controller('authentication')
 export class AuthenticationController {
   @Get('google')
   @UseGuards(AuthGuard('google'))
-  /**
-   * Initiates the Google OAuth2 login flow.
-   * This endpoint redirects the user to Google's authentication page.
-   * @param req - The request object from Express.
-   */
-  googleAuth() {
-    // The @UseGuards(AuthGuard('google')) decorator handles the redirection.
-  }
+  googleAuth() {}
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  /**
-   * It receives the user's profile and redirects them to the chat page.
-   * @param req - The request object from Express, containing the user's profile.
-   * @param res - The response object from Express, used to redirect the user.
-   */
-  googleAuthRedirect(
-    @Req()
-    req: Request & {
-      isAuthenticated?: () => boolean;
-      user?: Record<string, unknown>;
-      session?: Session & { id?: string };
-    },
-    @Res() res: Response,
-  ) {
-    // In a real app, you would implement session management and token generation here.
-    console.log('User authenticated:', req.user);
-    console.log('Session ID:', req.session?.id ?? 'no-session-id');
-    console.log(
-      'Is authenticated in callback:',
-      req.isAuthenticated?.() ?? false,
-    );
-
-    // Set a cookie to help debug
-    res.cookie('auth_debug', 'true', {
-      maxAge: 900000,
-      httpOnly: true,
-      path: '/',
-      sameSite: 'lax',
+  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    if (!req.user)
+      throw new UnauthorizedException(
+        'Google authentication did not return a user',
+      );
+    // Passport rotates, serializes and saves the login session before this callback completes.
+    await new Promise<void>((resolve, reject) => {
+      req.logIn(req.user!, { session: true }, (error) =>
+        error
+          ? reject(
+              error instanceof Error ? error : new Error('Session save failed'),
+            )
+          : resolve(),
+      );
     });
-
-    res.redirect('http://localhost:3001/chat');
+    res.redirect(
+      `${process.env.FRONTEND_URL || 'http://localhost:3001'}/connected`,
+    );
   }
 
   @Get('status')
-  status(
-    @Req()
-    req: Request & {
-      isAuthenticated?: () => boolean;
-      user?: Record<string, unknown>;
-      session?: Session & { id?: string };
-    },
-  ) {
-    // Check if the user is authenticated
+  status(@Req() req: Request & { user?: unknown }) {
     const isAuthenticated = req.isAuthenticated ? req.isAuthenticated() : false;
-    console.log('Auth status check:', isAuthenticated);
-    console.log('Session ID in status:', req.session?.id || 'no-session-id');
-    console.log('Session data:', req.session);
-    console.log('User in request:', req.user);
-    console.log('Cookies:', req.headers.cookie);
+    return { isAuthenticated, user: isAuthenticated ? req.user : null };
+  }
 
-    return {
-      isAuthenticated,
-      user: isAuthenticated ? req.user : null,
-      sessionId: req.session?.id || 'no-session-id',
-    };
+  @Post('logout')
+  logout(@Req() req: Request, @Res() res: Response) {
+    if (
+      req.get('origin') !==
+      new URL(process.env.FRONTEND_URL || 'http://localhost:3001').origin
+    )
+      throw new ForbiddenException('Mutation origin is not allowed');
+    req.logout((err) => {
+      if (err) {
+        res.status(500).json({ message: 'Sign out failed' });
+        return;
+      }
+      req.session.destroy((error) => {
+        if (error) {
+          res.status(500).json({ message: 'Sign out failed' });
+          return;
+        }
+        res.clearCookie('helios.sid', { path: '/' });
+        res.json({ signedOut: true });
+      });
+    });
   }
 }

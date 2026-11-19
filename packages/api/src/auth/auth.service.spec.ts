@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method -- Jest inspects mock calls; these references are never invoked without their receiver. */
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -30,10 +31,8 @@ describe('AuthService', () => {
         {
           provide: PrismaService,
           useValue: {
-            user: {
-              findUnique: jest.fn(),
-              create: jest.fn(),
-            },
+            findUserByEmail: jest.fn(),
+            createUser: jest.fn(),
           },
         },
       ],
@@ -49,26 +48,24 @@ describe('AuthService', () => {
 
   describe('validateUser', () => {
     it('should return an existing user', async () => {
-      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
+      jest.spyOn(prisma, 'findUserByEmail').mockResolvedValue(mockUser);
       const result = await service.validateUser(userDetails);
       expect(result).toEqual(mockUser);
-      expect(prisma.user.findUnique).toHaveBeenCalledWith({
-        where: { email: userDetails.email },
-      });
+      expect(prisma.findUserByEmail).toHaveBeenCalledWith(userDetails.email);
     });
 
     it('should create and return a new user if not found', async () => {
-      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
-      jest.spyOn(prisma.user, 'create').mockResolvedValue(mockUser);
+      jest.spyOn(prisma, 'findUserByEmail').mockResolvedValue(null);
+      jest.spyOn(prisma, 'createUser').mockResolvedValue(mockUser);
 
       const result = await service.validateUser(userDetails);
       expect(result).toEqual(mockUser);
-      expect(prisma.user.create).toHaveBeenCalledWith({ data: userDetails });
+      expect(prisma.createUser).toHaveBeenCalledWith(userDetails);
     });
 
     it('should throw an error if prisma throws an error', async () => {
       const error = new Error('Database error');
-      jest.spyOn(prisma.user, 'findUnique').mockRejectedValue(error);
+      jest.spyOn(prisma, 'findUserByEmail').mockRejectedValue(error);
       await expect(service.validateUser(userDetails)).rejects.toThrow(error);
     });
   });

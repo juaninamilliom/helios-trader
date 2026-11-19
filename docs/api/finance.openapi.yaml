@@ -1,0 +1,127 @@
+openapi: 3.0.3
+info:
+  title: Helios finance API
+  version: 0.1.0
+  description: Sandbox-only account aggregation. No money movement endpoints exist.
+servers:
+  - url: http://127.0.0.1:3003
+security:
+  - session: []
+components:
+  securitySchemes:
+    session:
+      type: apiKey
+      in: cookie
+      name: helios.sid
+  schemas:
+    Error:
+      type: object
+      properties:
+        message: {type: string}
+        code: {type: string}
+  responses:
+    Denied:
+      description: Authentication missing/expired or mutation Origin does not match FRONTEND_URL.
+    ProviderError:
+      description: Provider failure; no fabricated account data is substituted.
+paths:
+  /authentication/status:
+    get:
+      security: []
+      responses:
+        '200':
+          description: Authentication status and minimal current-user identity; never session identifiers.
+  /authentication/google:
+    get:
+      security: []
+      responses:
+        '302': {description: Google OAuth flow with server-side state validation.}
+  /authentication/logout:
+    post:
+      responses:
+        '201': {description: Session invalidated and cookie cleared.}
+        '403': {$ref: '#/components/responses/Denied'}
+  /finance/capabilities:
+    get:
+      security: []
+      responses:
+        '200': {description: Non-secret provider readiness, model configuration, sandbox environment and moneyMovement false.}
+  /finance/snapshot:
+    get:
+      responses:
+        '200': {description: User-owned connections, account balances in integer minor units, transaction category/source/confidence, posted USD totals, observed merchant/recurring patterns and explicit limitations. No provider tokens.}
+        '403': {$ref: '#/components/responses/Denied'}
+  /finance/link-token:
+    post:
+      responses:
+        '201': {description: Short-lived Plaid Link token for the authenticated user's Sandbox connection flow.}
+        '403': {$ref: '#/components/responses/Denied'}
+        '503': {description: Required server-side credentials or encryption key missing.}
+  /finance/exchange:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [publicToken]
+              properties:
+                publicToken: {type: string, maxLength: 500}
+      responses:
+        '201': {description: Connection identifier; token encrypted at rest, initial sync attempted. Check connection status for data readiness.}
+        '502': {$ref: '#/components/responses/ProviderError'}
+  /finance/connections/{id}/sync:
+    post:
+      parameters:
+        - {name: id, in: path, required: true, schema: {type: string}}
+      responses:
+        '201': {description: Accounts and all cursor pages persisted atomically.}
+        '404': {description: Connection not owned by this user.}
+        '409': {description: Sync already leased by another worker.}
+        '502': {$ref: '#/components/responses/ProviderError'}
+  /finance/connections/{id}/disconnect:
+    post:
+      parameters:
+        - {name: id, in: path, required: true, schema: {type: string}}
+      responses:
+        '201': {description: Plaid Item removed and local imported data deleted through cascade.}
+        '409': {description: Active sync must finish first.}
+        '502': {$ref: '#/components/responses/ProviderError'}
+  /finance/transactions/{id}/category:
+    post:
+      parameters:
+        - {name: id, in: path, required: true, schema: {type: string}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [category]
+              properties:
+                category:
+                  type: string
+                  enum: [Groceries, Dining, Shopping, Transport, Housing, Utilities, Subscriptions, Health, Income, Transfers, Other]
+      responses:
+        '201': {description: User presentation correction saved; accounting unchanged.}
+        '400': {description: Unsupported category.}
+        '404': {description: Transaction not owned by this user.}
+  /finance/ai-consent:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [consent]
+              properties:
+                consent: {type: boolean}
+      responses:
+        '201': {description: User opt-in bound to the current classifier, transport, model and provider allowlist; route changes require renewed consent. Revocation stops subsequent merchant requests but cannot recall earlier ones.}
+  /finance/classify:
+    post:
+      responses:
+        '201': {description: Attempted/classified counts, failure reasons, model and user-facing message. Up to 20 ambiguous posted purchases; refusal, timeout and invalid results leave categories unchanged.}
+        '400': {description: Minimal-data AI consent absent or scoped to a different route.}

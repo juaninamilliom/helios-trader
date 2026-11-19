@@ -81,5 +81,78 @@ model User {
   lastName  String?
   picture   String?
   createdAt DateTime @default(now())
+  financeConnections FinanceConnection[]
+  financePreference FinancePreference?
   // portfolios Portfolio[] // Uncomment if you want to relate portfolios to users
+}
+
+// Finance application data. Legacy trading records remain untouched.
+model FinanceConnection {
+  id             String   @id @default(cuid())
+  userId         Int
+  user           User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itemId         String   @unique
+  encryptedToken String
+  institution    String
+  environment    String
+  cursor         String?
+  status         String   @default("connected")
+  syncedAt       DateTime?
+  attemptedAt    DateTime?
+  leaseUntil     DateTime?
+  createdAt      DateTime @default(now())
+  accounts       FinanceAccount[]
+  transactions   FinanceTransaction[]
+  @@index([userId])
+}
+
+model FinanceAccount {
+  id           String @id
+  connectionId String
+  connection   FinanceConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  name         String
+  mask         String?
+  type         String
+  subtype      String?
+  currency     String?
+  currentCents BigInt?
+  availableCents BigInt?
+  balanceAt    DateTime
+  @@index([connectionId])
+}
+
+model FinanceTransaction {
+  id           String @id
+  connectionId String
+  connection   FinanceConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  accountId    String
+  date         String
+  merchant     String
+  amountCents  BigInt
+  currency     String?
+  pending      Boolean
+  pendingId    String?
+  removed      Boolean @default(false)
+  category     String
+  categorySource String
+  confidence   String
+  accounting   String
+  correctedCategory String?
+  model        String?
+  updatedAt    DateTime @updatedAt
+  @@index([connectionId, date])
+}
+
+model FinanceSession {
+  id        String @id
+  payload   Json
+  expiresAt DateTime
+}
+
+model FinancePreference {
+  userId       Int @id
+  user         User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  aiConsent    Boolean @default(false)
+  aiConsentScope String?
+  updatedAt    DateTime @updatedAt
 }

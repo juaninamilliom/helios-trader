@@ -1,0 +1,9 @@
+version: 1
+slug: helios-openai
+protocol: http
+name: Helios OpenAI contract stand-in
+port: 4012
+interceptRequests: true
+scenarios:
+  - name: default
+    path: default.js

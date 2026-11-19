@@ -298,6 +298,10 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
    * @param email - The user's email.
    * @returns A promise that resolves to the user or null.
    */
+  findUserById(id: number): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { id } });
+  }
+
   findUserByEmail(email: string): Promise<User | null> {
     return this.prisma.user.findUnique({ where: { email } });
   }

@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PassportSerializer } from '@nestjs/passport';
+import { PrismaService } from '../prisma/prisma.service';
 import { User } from '@prisma/client';
 
 @Injectable()
 export class SessionSerializer extends PassportSerializer {
+  constructor(private readonly prisma: PrismaService) {
+    super();
+  }
   /**
    * Serializes the user object into the session.
    * This determines what data is stored in the session.
@@ -28,7 +32,17 @@ export class SessionSerializer extends PassportSerializer {
     payload: { id: number; email: string },
     done: (err: Error | null, user: any) => void,
   ): void {
-    // In a real app, you might want to fetch the full user from the database
-    done(null, payload);
+    // Recheck the user so deleted identities cannot keep using an existing session.
+    void this.prisma
+      .findUserById(payload.id)
+      .then((user) =>
+        done(null, user ? { id: user.id, email: user.email } : false),
+      )
+      .catch((error: unknown) =>
+        done(
+          error instanceof Error ? error : new Error('Session lookup failed'),
+          null,
+        ),
+      );
   }
 }
